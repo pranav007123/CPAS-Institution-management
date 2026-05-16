@@ -1,0 +1,98 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}{{ title }} | CPAS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-header-card {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        border-radius: 1rem;
+        color: white;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2);
+    }
+    .card-modern {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .form-label { font-weight: 600; color: #475569; font-size: 0.875rem; }
+    .form-control, .form-select { border-radius: 0.75rem; padding: 0.75rem 1rem; border: 1px solid #e2e8f0; transition: all 0.2s; }
+    .form-control:focus, .form-select:focus { border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="container py-2" style="max-width: 900px;">
+    <!-- Header Banner -->
+    <div class="form-header-card d-flex align-items-center gap-3">
+        <a href="{% url 'students:batch_list' %}" class="btn btn-white bg-white text-primary rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm" style="width: 45px; height: 45px;">
+            <i class="bi bi-arrow-left fs-5"></i>
+        </a>
+        <div>
+            <h2 class="fw-bold mb-0 text-white">{{ title }}</h2>
+            <p class="mb-0 opacity-75">Define academic cohorts and assign faculty advisors.</p>
+        </div>
+    </div>
+
+    <div class="card card-modern">
+        <div class="card-body p-4 p-lg-5">
+            <form method="post" novalidate id="batchForm">
+                {% csrf_token %}
+                
+                <div class="row g-4">
+                    {% for field in form %}
+                    <div class="{% if field.name == 'batch_name' or field.name == 'course' %}col-12{% else %}col-md-6{% endif %}">
+                        <label class="form-label mb-2">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                        <div class="text-danger small mt-2">
+                            {% for error in field.errors %}<div><i class="bi bi-x-circle me-1"></i>{{ error }}</div>{% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="d-flex gap-3 justify-content-end mt-5 pt-4 border-top">
+                    <a href="{% url 'students:batch_list' %}" class="btn btn-light rounded-pill px-4 fw-medium">Cancel</a>
+                    <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm fw-bold">
+                        <i class="bi bi-check-lg me-2"></i>Save Batch
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const courseSelect = document.querySelector('select[name="course"]');
+    const semesterSelect = document.querySelector('select[name="current_semester"]');
+    
+    if (courseSelect && semesterSelect) {
+        courseSelect.addEventListener('change', function() {
+            const courseId = this.value;
+            if (!courseId) {
+                semesterSelect.innerHTML = '<option value="">---------</option>';
+                return;
+            }
+
+            fetch(`{% url 'courses:get_semesters' %}?course_id=${courseId}`)
+                .then(response => response.json())
+                .then(data => {
+                    semesterSelect.innerHTML = '<option value="">Select Semester</option>';
+                    data.forEach(sem => {
+                        const option = document.createElement('option');
+                        option.value = sem.id;
+                        option.textContent = `Semester ${sem.number}`;
+                        semesterSelect.appendChild(option);
+                    });
+                });
+        });
+    }
+});
+</script>
+{% endblock %}

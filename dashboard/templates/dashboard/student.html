@@ -1,0 +1,196 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Student Dashboard | CPAS{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid py-2">
+    <!-- Student Profile Banner -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-body p-0">
+                    <div class="row g-0">
+                        <div class="col-md-4 bg-primary p-4 d-flex flex-column justify-content-center text-white text-center">
+                            <div class="avatar-xl mx-auto mb-3 bg-white text-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 100px; height: 100px; font-size: 3rem; font-weight: 800;">
+                                {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+                            </div>
+                            <h3 class="fw-bold mb-1">{{ request.user.get_full_name }}</h3>
+                            <p class="opacity-75 mb-0">ID: {{ student.user.email }}</p>
+                        </div>
+                        <div class="col-md-8 p-4 bg-white">
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <small class="text-muted text-uppercase fw-bold d-block mb-1">Course</small>
+                                    <span class="fw-bold text-dark">{{ student.course.name }}</span>
+                                </div>
+                                <div class="col-sm-6">
+                                    <small class="text-muted text-uppercase fw-bold d-block mb-1">Batch</small>
+                                    <span class="fw-bold text-dark">{{ student.batch }}</span>
+                                </div>
+                                <div class="col-sm-6">
+                                    <small class="text-muted text-uppercase fw-bold d-block mb-1">Semester</small>
+                                    <span class="fw-bold text-dark">{% if student.current_semester %}Semester {{ student.current_semester.semester_number }}{% else %}—{% endif %}</span>
+                                </div>
+                                <div class="col-sm-6">
+                                    <small class="text-muted text-uppercase fw-bold d-block mb-1">Attendance</small>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress flex-grow-1" style="height: 10px;">
+                                            <div class="progress-bar bg-success" style="width: {{ attendance_pct }}%;"></div>
+                                        </div>
+                                        <span class="fw-bold text-success">{{ attendance_pct }}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">Current semester subjects</h5>
+                    <a href="{% url 'timetable:timetable_view' %}" class="btn btn-outline-success btn-sm rounded-pill">Timetable</a>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    {% if semester_subjects %}
+                    <div class="row g-2">
+                        {% for s in semester_subjects %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="p-3 border rounded-3 h-100 bg-light">
+                                <div class="fw-bold text-dark">{{ s.subject_code }}</div>
+                                <div class="small text-muted">{{ s.subject_name|truncatechars:40 }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted small mb-0">No subjects found for your current semester. Contact academics office.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Main Content Area -->
+        <div class="col-12 col-lg-8">
+            <!-- Academic Performance -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">Recent Exam Results</h5>
+                    <a href="{% url 'examinations:my_results' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">View Report Card</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-borderless align-middle mb-0">
+                            <thead>
+                                <tr class="text-muted small text-uppercase">
+                                    <th class="border-0">Subject</th>
+                                    <th class="border-0">Exam</th>
+                                    <th class="border-0">Marks</th>
+                                    <th class="border-0 text-end">Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for mark in recent_results %}
+                                <tr>
+                                    <td><span class="fw-bold text-dark">{{ mark.subject.name }}</span></td>
+                                    <td>{{ mark.exam.name }}</td>
+                                    <td>{{ mark.marks_obtained }} / {{ mark.total_marks }}</td>
+                                    <td class="text-end">
+                                        <span class="badge {% if mark.grade == 'F' %}bg-danger{% else %}bg-success{% endif %} rounded-3 px-3">{{ mark.grade }}</span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center py-4 text-muted">No results published yet.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upcoming Assignments -->
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0">Upcoming Deadlines</h5>
+                </div>
+                <div class="card-body">
+                    {% for assignment in upcoming_assignments %}
+                    <div class="d-flex align-items-center p-3 mb-3 bg-light rounded-4 border-start border-4 {% if assignment.is_urgent %}border-danger{% else %}border-info{% endif %}">
+                        <div class="flex-shrink-0 bg-white rounded-3 p-2 me-3 shadow-sm text-center" style="width: 60px;">
+                            <div class="fw-bold text-primary">{{ assignment.due_date|date:"d" }}</div>
+                            <div class="small text-muted text-uppercase">{{ assignment.due_date|date:"M" }}</div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1">{{ assignment.title }}</h6>
+                            <small class="text-muted">{{ assignment.subject.name }}</small>
+                        </div>
+                        <a href="{% url 'assignments:assignment_detail' assignment.pk %}" class="btn btn-primary rounded-pill px-4">Submit</a>
+                    </div>
+                    {% empty %}
+                    <p class="text-center text-muted py-3">You're all caught up! No pending assignments.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Actions -->
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-gradient-dark text-white p-2" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4">Quick Navigation</h5>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <a href="{% url 'attendance:my_attendance' %}" class="btn btn-light w-100 p-3 rounded-4 border-0 shadow-sm">
+                                <i class="bi bi-calendar-check d-block fs-3 mb-2 text-primary"></i>
+                                <span class="small fw-bold">Attendance</span>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'timetable:timetable_view' %}" class="btn btn-light w-100 p-3 rounded-4 border-0 shadow-sm">
+                                <i class="bi bi-clock-history d-block fs-3 mb-2 text-success"></i>
+                                <span class="small fw-bold">Timetable</span>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'assignments:assignment_list' %}" class="btn btn-light w-100 p-3 rounded-4 border-0 shadow-sm">
+                                <i class="bi bi-journal-text d-block fs-3 mb-2 text-info"></i>
+                                <span class="small fw-bold">Assignments</span>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'examinations:my_results' %}" class="btn btn-light w-100 p-3 rounded-4 border-0 shadow-sm">
+                                <i class="bi bi-award d-block fs-3 mb-2 text-warning"></i>
+                                <span class="small fw-bold">My Results</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- News & Updates -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-warning py-3 border-0">
+                    <h6 class="fw-bold mb-0 text-dark">Campus News</h6>
+                </div>
+                <div class="card-body p-0">
+                    {% for announcement in announcements %}
+                    <div class="p-3 border-bottom hover-bg-light transition-all cursor-pointer">
+                        <h6 class="fw-bold mb-1 small">{{ announcement.title }}</h6>
+                        <span class="text-muted tiny d-block mb-2">{{ announcement.created_at|date:"M d, Y" }}</span>
+                        <p class="mb-0 text-secondary x-small">{{ announcement.content|truncatewords:20 }}</p>
+                    </div>
+                    {% empty %}
+                    <p class="text-center text-muted py-4 small">No news at the moment.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

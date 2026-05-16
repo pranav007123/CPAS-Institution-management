@@ -1,0 +1,82 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Manage HODs | CPAS{% endblock %}
+{% block dashboard_content %}
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <h2 class="fw-bold"><i class="bi bi-person-gear text-warning me-2"></i>Heads of Department</h2>
+    <a href="{% url 'departments:add_hod' %}" class="btn btn-warning text-white rounded-pill px-4 shadow-sm">
+      <i class="bi bi-plus-circle me-2"></i>Add HOD
+    </a>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light text-uppercase small text-muted">
+            <tr>
+              <th class="ps-4">Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Department(s)</th>
+              <th>Status</th>
+              <th class="text-end pe-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for hod in hods %}
+            <tr>
+              <td class="ps-4">
+                <div class="d-flex align-items-center gap-2">
+                  {% if hod.profile_picture %}
+                  <img src="{{ hod.profile_picture.url }}" class="rounded-circle" width="36" height="36" style="object-fit:cover;">
+                  {% else %}
+                  <div class="rounded-circle bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center fw-bold" style="width:36px;height:36px;font-size:0.8rem;">
+                    {{ hod.first_name|first|upper }}{{ hod.last_name|first|upper }}
+                  </div>
+                  {% endif %}
+                  <div class="fw-bold">{{ hod.get_full_name }}</div>
+                </div>
+              </td>
+              <td class="text-muted">{{ hod.email }}</td>
+              <td class="text-muted">{{ hod.phone_number|default:"—" }}</td>
+              <td>
+                {% for dept in hod.managed_departments.all %}
+                  <span class="badge bg-warning bg-opacity-10 text-warning border rounded-pill px-3 me-1">
+                    <i class="bi bi-diagram-3 me-1"></i>{{ dept.department_name }}
+                  </span>
+                {% empty %}
+                  <span class="text-muted">— Not Assigned —</span>
+                {% endfor %}
+              </td>
+              <td>
+                {% if hod.is_active %}
+                  <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3"><i class="bi bi-check-circle me-1"></i>Active</span>
+                {% else %}
+                  <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3">Inactive</span>
+                {% endif %}
+              </td>
+              <td class="text-end pe-4">
+                <form method="post" action="{% url 'departments:hod_delete' hod.pk %}" class="d-inline" onsubmit="return confirm('Are you sure you want to PERMANENTLY delete this HOD account?');">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-light border text-danger" title="Delete HOD">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="text-center py-5 text-muted">
+                <i class="bi bi-person-x fs-1 d-block mb-2"></i>
+                No HODs found. <a href="{% url 'departments:add_hod' %}">Add one now.</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

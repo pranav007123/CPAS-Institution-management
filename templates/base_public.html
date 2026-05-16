@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block layout %}
+{% include 'includes/public_navbar.html' %}
+<div class="public-container">
+    {% block public_content %}{% endblock %}
+</div>
+
+{% include 'includes/footer.html' %}
+{% endblock %}

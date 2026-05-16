@@ -1,0 +1,48 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Create Assignment | CPAS{% endblock %}
+{% block dashboard_content %}
+<div class="container py-4" style="max-width:700px;">
+  <div class="d-flex align-items-center mb-4 gap-3">
+    <a href="{% url 'assignments:assignment_list' %}" class="btn btn-light rounded-circle shadow-sm" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;"><i class="bi bi-arrow-left"></i></a>
+    <h2 class="fw-bold mb-0">Create Assignment</h2>
+  </div>
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-12"><label class="form-label fw-medium">Assignment Title</label><input type="text" name="title" class="form-control" required placeholder="e.g., Python Data Structures Assignment"></div>
+          <div class="col-12"><label class="form-label fw-medium">Description</label><textarea name="description" class="form-control" rows="3" required placeholder="Describe the assignment requirements..."></textarea></div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Subject</label>
+            <select name="subject" class="form-select" required>
+              {% for s in subjects %}<option value="{{ s.pk }}">{{ s.name }} ({{ s.code }})</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Batch</label>
+            <select name="batch" class="form-select" required>
+              {% for b in batches %}<option value="{{ b.pk }}">{{ b }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6"><label class="form-label fw-medium">Due Date & Time</label><input type="datetime-local" name="deadline" id="deadline" class="form-control" required></div>
+          <div class="col-md-6"><label class="form-label fw-medium">Attachment (Optional)</label><input type="file" name="file_attachment" class="form-control"></div>
+        </div>
+        <div class="d-flex justify-content-end gap-3 mt-4 pt-3 border-top">
+          <a href="{% url 'assignments:assignment_list' %}" class="btn btn-light rounded-pill px-4">Cancel</a>
+          <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm">Publish Assignment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Set minimum date-time to now
+  document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('deadline').min = now.toISOString().slice(0, 16);
+  });
+</script>
+{% endblock %}

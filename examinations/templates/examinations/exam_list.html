@@ -1,0 +1,58 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Examinations | CPAS{% endblock %}
+{% block dashboard_content %}
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold"><i class="bi bi-award-fill text-warning me-2"></i>Examinations</h2>
+    {% if user.is_super_admin or user.is_institution_admin %}
+    <a href="{% url 'examinations:exam_add' %}" class="btn btn-warning text-white rounded-pill px-4 shadow-sm"><i class="bi bi-plus-circle me-2"></i>Create Exam</a>
+    {% endif %}
+  </div>
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light text-uppercase small text-muted">
+            <tr><th class="ps-4">Exam Name</th><th>Type</th><th>Course</th><th>Semester</th><th>Schedule</th><th>Status</th><th class="text-end pe-4">Actions</th></tr>
+          </thead>
+          <tbody>
+            {% for exam in exams %}
+            <tr>
+              <td class="ps-4 fw-bold">{{ exam.name }}</td>
+              <td><span class="badge bg-info bg-opacity-10 text-info">{{ exam.get_exam_type_display }}</span></td>
+              <td>{{ exam.course.code }}</td>
+              <td>Sem {{ exam.semester.semester_number }}</td>
+              <td>{{ exam.start_date }} → {{ exam.end_date }}</td>
+              <td>
+                {% if exam.is_published %}<span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3"><i class="bi bi-check-circle me-1"></i>Published</span>
+                {% else %}<span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3"><i class="bi bi-clock me-1"></i>Draft</span>{% endif %}
+              </td>
+              <td class="text-end pe-4">
+                <div class="d-flex justify-content-end gap-1">
+                    {% if user.is_faculty or user.is_super_admin or user.is_hod %}
+                    <a href="{% url 'examinations:marks_entry' exam.pk %}" class="btn btn-sm btn-light border text-warning" title="Enter Marks"><i class="bi bi-pencil-fill"></i></a>
+                    <a href="{% url 'examinations:batch_results' exam.pk %}" class="btn btn-sm btn-light border text-primary" title="View Batch Results"><i class="bi bi-graph-up"></i></a>
+                    {% endif %}
+                    
+                    {% if user.is_super_admin or user.is_institution_admin or user.is_hod %}
+                    <a href="{% url 'examinations:exam_timetable' exam.pk %}" class="btn btn-sm btn-light border text-dark" title="Manage Timetable"><i class="bi bi-calendar3"></i></a>
+                    <form method="post" action="{% url 'examinations:publish_results' exam.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-light border {% if exam.is_published %}text-danger{% else %}text-success{% endif %}" title="Toggle Publish">
+                            <i class="bi bi-{% if exam.is_published %}eye-slash{% else %}eye{% endif %}"></i>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="text-center py-5 text-muted"><i class="bi bi-inbox fs-1 d-block mb-2"></i>No exams found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

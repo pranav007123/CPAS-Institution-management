@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Login | CPAS{% endblock %}
+
+{% block content %}
+<div class="min-vh-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-4">
+                <!-- Logo / Brand -->
+                <div class="text-center mb-4">
+                    <i class="bi bi-mortarboard-fill text-warning" style="font-size: 3.5rem;"></i>
+                    <h3 class="text-white fw-bold mt-2">CPAS</h3>
+                    <p class="text-white-50 small">Smart Campus and institutional ERP</p>
+                </div>
+                
+                <!-- Login Card -->
+                <div class="card shadow-lg border-0 rounded-4">
+                    <div class="card-body p-4 p-md-5">
+                        <h4 class="fw-bold text-center mb-1">Welcome Back</h4>
+                        <p class="text-muted text-center mb-4 small">Sign in to your account</p>
+                        
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            {% if form.errors %}
+                            <div class="alert alert-danger py-2 rounded-3 small">
+                                <i class="bi bi-x-circle-fill me-1"></i> Invalid email or password.
+                            </div>
+                            {% endif %}
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small text-muted">Email Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope text-muted"></i></span>
+                                    <input type="email" name="username" class="form-control bg-light border-start-0 py-2" required placeholder="name@cpas.edu" autofocus>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold small text-muted">Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
+                                    <input type="password" name="password" class="form-control bg-light border-start-0 py-2" required placeholder="••••••••">
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg fw-bold rounded-3">
+                                    Sign In <i class="bi bi-box-arrow-in-right ms-2"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <p class="text-center mt-4 text-white-50 small">
+                    <a href="{% url 'website:home' %}" class="text-white-50 text-decoration-none">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Website
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

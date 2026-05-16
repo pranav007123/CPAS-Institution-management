@@ -1,0 +1,42 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Create Exam | CPAS{% endblock %}
+{% block dashboard_content %}
+<div class="container py-4" style="max-width:700px;">
+  <div class="d-flex align-items-center mb-4 gap-3">
+    <a href="{% url 'examinations:exam_list' %}" class="btn btn-light rounded-circle shadow-sm" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;"><i class="bi bi-arrow-left"></i></a>
+    <h2 class="fw-bold mb-0">{{ title }}</h2>
+  </div>
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label fw-medium">Exam Name</label>
+            <input type="text" name="name" class="form-control" required placeholder="e.g., Internal Assessment 1">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Exam Type</label>
+            <select name="exam_type" class="form-select" required>
+              {% for val, label in exam_types %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Academic Semester</label>
+            <select name="semester" class="form-select" required>
+              <option value="">— Select Semester —</option>
+              {% for s in semesters %}
+              <option value="{{ s.pk }}">{{ s.course.course_name }} - Sem {{ s.semester_number }} ({{ s.academic_year }})</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="d-flex justify-content-end gap-3 mt-4 pt-3 border-top">
+          <a href="{% url 'examinations:exam_list' %}" class="btn btn-light rounded-pill px-4">Cancel</a>
+          <button type="submit" class="btn btn-warning text-white rounded-pill px-5 shadow-sm">{{ title }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

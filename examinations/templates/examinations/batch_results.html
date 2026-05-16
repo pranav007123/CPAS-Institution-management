@@ -1,0 +1,76 @@
+{% extends 'base_dashboard.html' %}
+{% load exam_extras %}
+{% block title %}Batch Results - {{ exam.name }} | CPAS{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid py-4">
+    <div class="d-flex align-items-center mb-4 gap-3">
+        <a href="{% url 'examinations:exam_list' %}" class="btn btn-light rounded-circle shadow-sm" style="width:45px;height:45px;display:flex;align-items:center;justify-content:center;">
+            <i class="bi bi-arrow-left fs-5"></i>
+        </a>
+        <div>
+            <h2 class="fw-bold mb-0">Batch Performance Report</h2>
+            <p class="text-muted mb-0">{{ exam.name }} — {{ exam.semester.course.course_name }}</p>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-white p-3 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0">Tabulated Marks Sheet</h5>
+            <button class="btn btn-sm btn-outline-dark rounded-pill px-3" onclick="window.print()"><i class="bi bi-printer me-1"></i> Print Report</button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle mb-0 text-center">
+                <thead class="table-light small text-muted text-uppercase">
+                    <tr>
+                        <th class="text-start ps-4">Student Name & Reg No.</th>
+                        {% for subject in subjects %}
+                        <th>{{ subject.subject_code }}</th>
+                        {% endfor %}
+                        <th class="bg-primary bg-opacity-10 text-primary">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td class="text-start ps-4">
+                            <div class="fw-bold text-dark">{{ student.user.get_full_name }}</div>
+                            <small class="text-muted">{{ student.register_number }}</small>
+                        </td>
+                        
+                        {% with student_id=student.id %}
+                        {% for subject in subjects %}
+                        <td>
+                            {% if results_map|get_item:student_id|get_item:subject.id %}
+                                <span class="fw-bold text-success">{{ results_map|get_item:student_id|get_item:subject.id }}</span>
+                            {% else %}
+                                <span class="text-muted small">N/A</span>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                        
+                        <td class="bg-primary bg-opacity-10 fw-bold text-primary">
+                            {# Simple sum calculation would ideally be done in view or custom filter #}
+                            {{ results_map|get_item:student_id|get_sum }}
+                        </td>
+                        {% endwith %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="{{ subjects.count|add:2 }}" class="py-5 text-muted">No student records found for this batch.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        .btn, .sidebar, .navbar { display: none !important; }
+        .card { border: none !important; box-shadow: none !important; }
+        .container-fluid { padding: 0 !important; }
+    }
+</style>
+{% endblock %}

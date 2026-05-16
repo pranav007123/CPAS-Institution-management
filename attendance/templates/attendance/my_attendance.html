@@ -1,0 +1,29 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}My Attendance | CPAS{% endblock %}
+{% block dashboard_content %}
+<div class="container py-4">
+  <h2 class="fw-bold mb-4"><i class="bi bi-journal-check text-primary me-2"></i>My Attendance</h2>
+  {% for row in attendance_data %}
+  <div class="card border-0 shadow-sm rounded-4 mb-3 {% if row.low %}border-start border-danger border-4{% endif %}">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h5 class="fw-bold mb-1">{{ row.subject.name }}</h5>
+          <span class="badge bg-light text-dark border">{{ row.subject.code }}</span>
+        </div>
+        <div class="text-end">
+          <h3 class="fw-bold mb-0 {% if row.low %}text-danger{% else %}text-success{% endif %}">{{ row.percentage }}%</h3>
+          <small class="text-muted">{{ row.present }}/{{ row.total }} Classes Attended</small>
+        </div>
+      </div>
+      <div class="progress mt-3" style="height:10px;border-radius:999px;">
+        <div class="progress-bar {% if row.low %}bg-danger{% else %}bg-success{% endif %}" style="width:{{ row.percentage }}%;border-radius:999px;"></div>
+      </div>
+      {% if row.low %}<div class="alert alert-danger mt-3 mb-0 py-2 small"><i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Attendance Shortage!</strong> Your attendance is below 75%. Please attend classes regularly to maintain eligibility.</div>{% endif %}
+    </div>
+  </div>
+  {% empty %}
+  <div class="text-center py-5 text-muted"><i class="bi bi-inbox fs-1 d-block mb-3"></i>No attendance records found for your current semester.</div>
+  {% endfor %}
+</div>
+{% endblock %}

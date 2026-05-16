@@ -1,0 +1,71 @@
+<!-- Top Bar -->
+<div class="top-bar d-none d-lg-block">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <a href="#"><i class="bi bi-telephone-fill me-1"></i> +91 98765 43210</a>
+            <a href="#"><i class="bi bi-envelope-fill me-1"></i> info@cpas.edu</a>
+        </div>
+        <div>
+            <a href="#"><i class="bi bi-book me-1"></i> Library</a>
+            <a href="#"><i class="bi bi-person-workspace me-1"></i> Job Portal</a>
+            <a href="#"><i class="bi bi-cash me-1"></i> Online Fee Payment</a>
+            <a href="#"><i class="bi bi-exclamation-circle me-1"></i> Grievance Cell</a>
+        </div>
+    </div>
+</div>
+
+<!-- Main Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm py-3">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'website:home' %}">
+            <i class="bi bi-mortarboard-fill text-primary me-2" style="font-size: 2rem;"></i>
+            <div>
+                <div class="lh-1">CPAS</div>
+                <div class="fs-6 fw-normal text-muted" style="letter-spacing: 1px;">Smart Campus</div>
+            </div>
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'website:home' %}">HOME</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'website:about' %}">ABOUT US</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'website:courses' %}">ACADEMICS</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'website:notices' %}">NOTICES</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'website:contact' %}">CONTACT</a>
+                </li>
+                <li class="nav-item ms-lg-4 mt-3 mt-lg-0">
+                    {% if user.is_authenticated %}
+                        {% if user.is_super_admin or user.is_institution_admin %}
+                            <a class="btn btn-login" href="{% url 'dashboard:admin_dashboard' %}">
+                                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                            </a>
+                        {% elif user.is_faculty or user.is_hod %}
+                            <a class="btn btn-login" href="{% url 'dashboard:faculty_dashboard' %}">
+                                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                            </a>
+                        {% else %}
+                            <a class="btn btn-login" href="{% url 'dashboard:student_dashboard' %}">
+                                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a class="btn btn-login" href="{% url 'accounts:login' %}">
+                            <i class="bi bi-person-fill me-1"></i> Student Login
+                        </a>
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

@@ -1,0 +1,94 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}{{ title }} | CPAS{% endblock %}
+{% block dashboard_content %}
+<div class="container py-4" style="max-width:720px;">
+  <div class="d-flex align-items-center mb-4 gap-3">
+    <a href="{% url 'courses:subject_list' %}" class="btn btn-light rounded-circle shadow-sm" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;"><i class="bi bi-arrow-left"></i></a>
+    <h2 class="fw-bold mb-0">{{ title }}</h2>
+  </div>
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Course</label>
+            {{ form.course }}
+            {% if form.course.errors %}<div class="text-danger small">{{ form.course.errors|join:", " }}</div>{% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Semester</label>
+            {{ form.semester }}
+            {% if form.semester.errors %}<div class="text-danger small">{{ form.semester.errors|join:", " }}</div>{% endif %}
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-medium">Subject Name</label>
+            {{ form.subject_name }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Subject Code</label>
+            {{ form.subject_code }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Credits</label>
+            {{ form.credits }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Subject Type</label>
+            {{ form.subject_type }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Weekly Hours</label>
+            {{ form.weekly_hours }}
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-medium">Assigned Faculty</label>
+            {{ form.assigned_faculty }}
+            <div class="form-text">Hold Ctrl (Windows) or Cmd (Mac) to select multiple.</div>
+          </div>
+          <div class="col-12">
+            <div class="form-check form-switch">
+              {{ form.is_active }}
+              <label class="form-check-label ms-2" for="{{ form.is_active.id_for_label }}">Active subject</label>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex gap-3 justify-content-end mt-4 pt-3 border-top">
+          <a href="{% url 'courses:subject_list' %}" class="btn btn-light rounded-pill px-4">Cancel</a>
+          <button type="submit" class="btn btn-info text-white rounded-pill px-5 shadow-sm">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const courseSelect = document.getElementById('id_course');
+    const semesterSelect = document.getElementById('id_semester');
+
+    if (courseSelect && semesterSelect) {
+        courseSelect.addEventListener('change', function() {
+            const courseId = this.value;
+            if (!courseId) {
+                semesterSelect.innerHTML = '<option value="">---------</option>';
+                return;
+            }
+
+            fetch(`{% url 'courses:get_semesters' %}?course_id=${courseId}`)
+                .then(response => response.json())
+                .then(data => {
+                    semesterSelect.innerHTML = '';
+                    data.forEach(sem => {
+                        const option = document.createElement('option');
+                        option.value = sem.id;
+                        option.textContent = `Semester ${sem.number}`;
+                        semesterSelect.appendChild(option);
+                    });
+                });
+        });
+    }
+});
+</script>
+{% endblock %}
+

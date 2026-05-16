@@ -1,0 +1,87 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Marks Entry | CPAS{% endblock %}
+{% block dashboard_content %}
+<div class="container py-4" style="max-width:850px;">
+  <div class="d-flex align-items-center mb-4 gap-3">
+    <a href="{% url 'examinations:exam_list' %}" class="btn btn-light rounded-circle shadow-sm" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;"><i class="bi bi-arrow-left"></i></a>
+    <div>
+      <h2 class="fw-bold mb-0">Marks Entry</h2>
+      <p class="text-muted mb-0">{{ exam.name }} — {{ exam.semester.course.course_name }}</p>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+      <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-8">
+          <label class="form-label fw-medium">Select Subject</label>
+          <select name="subject_id" class="form-select" onchange="this.form.submit()" required>
+            <option value="">— Choose a Subject —</option>
+            {% for sub in subjects %}
+            <option value="{{ sub.pk }}" {% if selected_subject.pk == sub.pk %}selected{% endif %}>{{ sub.subject_name }} ({{ sub.subject_code }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-outline-primary w-100">Load Students</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if selected_subject %}
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="subject" value="{{ selected_subject.pk }}">
+    
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+      <div class="card-header bg-white p-3 border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-person-badge me-2 text-info"></i>Students List</h5>
+        <div class="d-flex align-items-center gap-2">
+            <span class="small text-muted">Max Marks:</span>
+            <input type="number" name="max_marks" class="form-control form-control-sm" style="width:70px;" value="100" required>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light text-uppercase small text-muted">
+              <tr>
+                <th class="ps-4">Student Name</th>
+                <th>Reg Number</th>
+                <th class="text-center">Marks Obtained</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for student in students %}
+              <tr>
+                <td class="ps-4 fw-bold">{{ student.user.get_full_name }}</td>
+                <td><span class="badge bg-light text-dark border">{{ student.register_number }}</span></td>
+                <td class="text-center">
+                  <input type="number" name="marks_{{ student.pk }}" class="form-control form-control-sm text-center mx-auto" style="max-width:100px;" placeholder="0.0" step="0.5" min="0" required>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <div class="d-flex justify-content-end gap-3">
+      <a href="{% url 'examinations:exam_list' %}" class="btn btn-light px-4 rounded-pill">Cancel</a>
+      <button type="submit" class="btn btn-success px-5 rounded-pill shadow-sm"><i class="bi bi-cloud-upload me-2"></i>Upload Marks</button>
+    </div>
+  </form>
+  {% elif subjects %}
+  <div class="text-center py-5 card border-0 shadow-sm rounded-4">
+      <i class="bi bi-journal-text fs-1 opacity-25 d-block mb-3"></i>
+      <p class="text-muted">Please select a subject from the list above to enter marks.</p>
+  </div>
+  {% else %}
+  <div class="alert alert-warning rounded-4 shadow-sm">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>You are not assigned to any subjects in this semester.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

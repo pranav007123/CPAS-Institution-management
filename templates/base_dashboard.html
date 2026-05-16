@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block layout %}
+<div class="wrapper d-flex align-items-stretch">
+    <!-- Sidebar -->
+    {% include 'includes/sidebar.html' %}
+
+    <!-- Page Content -->
+    <div id="content" class="flex-grow-1 d-flex flex-column">
+        {% include 'includes/navbar.html' %}
+
+        <div class="content-body p-4 fade-in">
+            {% block dashboard_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebarToggle = document.getElementById('sidebarCollapse');
+    const sidebar = document.getElementById('sidebar');
+    const content = document.getElementById('content');
+    
+    if(sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('mobile-active');
+                content.classList.toggle('sidebar-open');
+            } else {
+                sidebar.classList.toggle('active');
+            }
+        });
+    }
+
+    // Close sidebar on mobile when clicking content
+    if (content) {
+        content.addEventListener('click', function() {
+            if (window.innerWidth <= 768 && sidebar.classList.contains('mobile-active')) {
+                sidebar.classList.remove('mobile-active');
+                content.classList.remove('sidebar-open');
+            }
+        });
+    }
+    
+    // Auto-highlight active sidebar link
+    document.querySelectorAll('#sidebar a').forEach(link => {
+        const linkPath = new URL(link.href, window.location.origin).pathname;
+        const currentPath = window.location.pathname;
+        
+        if (currentPath === linkPath || (currentPath.startsWith(linkPath) && linkPath !== '/')) {
+            link.closest('li').classList.add('active');
+        }
+    });
+});
+</script>
+{% endblock %}

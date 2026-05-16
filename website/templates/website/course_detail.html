@@ -1,0 +1,92 @@
+{% extends 'base_public.html' %}
+
+{% block title %}{{ course.course_name }} | CPAS{% endblock %}
+
+{% block public_content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <a href="{% url 'website:courses' %}" class="btn btn-light rounded-circle shadow-sm"
+                    style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;"><i
+                        class="bi bi-arrow-left"></i></a>
+                <h1 class="fw-bold text-dark mb-0">{{ course.course_name }}</h1>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3 border-bottom pb-2">Course Overview</h5>
+                    <p class="text-secondary" style="line-height: 1.8;">
+                        {% if course.description %}
+                        {{ course.description|linebreaks }}
+                        {% else %}
+                        This course provides comprehensive training and academic knowledge in the field of {{
+                        course.course_name }}.
+                        It is designed to equip students with the necessary skills and professional expertise to excel
+                        in their careers.
+                        {% endif %}
+                    </p>
+
+                    <h5 class="fw-bold mt-4 mb-3 border-bottom pb-2">Eligibility Criteria</h5>
+                    <p class="text-secondary">
+                        {% if course.eligibility %}
+                        {{ course.eligibility|linebreaks }}
+                        {% else %}
+                        Candidates should have successfully completed their previous qualifying examination from a
+                        recognized board/university with a minimum aggregate percentage as per institutional norms.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 bg-primary text-white p-2">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4">Course Highlights</h5>
+                    <div class="d-flex flex-column gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="bi bi-tag-fill fs-4 opacity-75"></i>
+                            <div>
+                                <small class="d-block opacity-75 text-uppercase">Course Code</small>
+                                <span class="fw-bold">{{ course.code }}</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="bi bi-clock-fill fs-4 opacity-75"></i>
+                            <div>
+                                <small class="d-block opacity-75 text-uppercase">Duration</small>
+                                <span class="fw-bold">{{ course.duration }} Years</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="bi bi-layers-fill fs-4 opacity-75"></i>
+                            <div>
+                                <small class="d-block opacity-75 text-uppercase">Structure</small>
+                                <span class="fw-bold">{{ course.total_semesters }} Semesters</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="bi bi-building fs-4 opacity-75"></i>
+                            <div>
+                                <small class="d-block opacity-75 text-uppercase">Department</small>
+                                <span class="fw-bold">{{ course.department.name }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="bg-white opacity-25">
+                    <!--<a href="{% url 'accounts:login' %}" class="btn btn-light w-100 rounded-pill fw-bold mt-2">Login to Apply</a>-->
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 mt-4 bg-warning-subtle border-start border-warning border-4">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-dark"><i class="bi bi-info-circle-fill me-2"></i>Admissions Open</h6>
+                    <p class="small text-muted mb-0">Applications for the next academic cycle are currently being
+                        processed. Create an account to start your journey with us.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

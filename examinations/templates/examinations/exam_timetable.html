@@ -1,0 +1,100 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Exam Timetable - {{ exam.name }} | CPAS{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid py-4">
+    <div class="d-flex align-items-center mb-4 gap-3">
+        <a href="{% url 'examinations:exam_list' %}" class="btn btn-light rounded-circle shadow-sm" style="width:45px;height:45px;display:flex;align-items:center;justify-content:center;">
+            <i class="bi bi-arrow-left fs-5"></i>
+        </a>
+        <div>
+            <h2 class="fw-bold mb-0">Manage Exam Timetable</h2>
+            <p class="text-muted mb-0">{{ exam.name }} — {{ exam.semester.course.course_name }}</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Add/Edit Entry Form -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4">Add Schedule</h5>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Subject</label>
+                            <select name="subject" class="form-select" required>
+                                {% for s in subjects %}
+                                <option value="{{ s.id }}">{{ s.subject_name }} ({{ s.subject_code }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Date</label>
+                            <input type="date" name="date" class="form-control" required>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label class="form-label fw-medium">Start Time</label>
+                                <input type="time" name="start_time" class="form-control" required>
+                            </div>
+                            <div class="col">
+                                <label class="form-label fw-medium">End Time</label>
+                                <input type="time" name="end_time" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">Room Number</label>
+                            <input type="text" name="room_number" class="form-control" placeholder="e.g. Block A, Room 102">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold">
+                            <i class="bi bi-plus-lg me-1"></i> Update Timetable
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timetable View -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white p-3 border-bottom">
+                    <h5 class="fw-bold mb-0">Current Schedule</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-uppercase small text-muted">
+                            <tr>
+                                <th class="ps-4">Date</th>
+                                <th>Subject</th>
+                                <th>Time</th>
+                                <th>Room</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in timetable %}
+                            <tr>
+                                <td class="ps-4 fw-bold text-primary">{{ entry.date|date:"d M, Y" }}</td>
+                                <td>
+                                    <div class="fw-bold">{{ entry.subject.subject_name }}</div>
+                                    <small class="text-muted">{{ entry.subject.subject_code }}</small>
+                                </td>
+                                <td>{{ entry.start_time|time:"h:i A" }} - {{ entry.end_time|time:"h:i A" }}</td>
+                                <td><span class="badge bg-light text-dark border">{{ entry.room_number|default:"TBA" }}</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>
+                                    No schedule entries found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

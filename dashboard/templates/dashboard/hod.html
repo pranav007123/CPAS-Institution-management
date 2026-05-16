@@ -1,0 +1,244 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}{{ role_title }} | CPAS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-welcome-banner {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        border-radius: 1rem;
+        color: white;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 25px rgba(5, 150, 105, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .admin-welcome-banner::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.05)" stroke-width="2" fill="none"/></svg>') repeat;
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    .stat-card {
+        border: none;
+        border-radius: 1rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .stat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+    .stat-icon { font-size: 2.5rem; opacity: 0.8; }
+    .bg-gradient-blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; }
+    .bg-gradient-purple { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; }
+    .bg-gradient-red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; }
+
+    .quick-action-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+    .quick-action-btn:hover { transform: scale(1.02); }
+
+    .table-modern {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+    }
+    .table-modern thead { background-color: #f8fafc; border-bottom: 2px solid #e2e8f0; }
+    .table-modern th { color: #475569; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; padding: 1rem 1.5rem; }
+    .table-modern td { padding: 1rem 1.5rem; vertical-align: middle; color: #334155; }
+    .table-modern tbody tr:hover { background-color: #f1f5f9; }
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid py-2">
+    <!-- Welcome Banner -->
+    <div class="admin-welcome-banner d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+            <h1 class="fw-bold mb-2">HOD Dashboard: {{ department.name|default:"Unassigned" }} 📚</h1>
+            <p class="mb-0 fs-5 text-white-50">Manage your faculty workloads, students, and academic progress.</p>
+        </div>
+        <div class="mt-3 mt-md-0">
+            <span class="badge bg-white text-success fs-6 py-2 px-3 rounded-pill shadow-sm">
+                <i class="bi bi-diagram-3-fill me-2"></i> {{ department.code|default:"N/A" }}
+            </span>
+        </div>
+    </div>
+
+    {% if not department %}
+    <div class="alert alert-warning shadow-sm rounded-3">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> You are not assigned as Head of any Department. Please contact your Principal.
+    </div>
+    {% else %}
+    <!-- Stats Grid -->
+    <div class="row g-4 mb-5">
+        <div class="col-12 col-md-4">
+            <div class="card stat-card bg-gradient-blue h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="card-title text-uppercase fw-bold opacity-75 mb-0">Department Faculty</h6>
+                        <i class="bi bi-person-workspace stat-icon"></i>
+                    </div>
+                    <h2 class="display-5 fw-bold mb-0">{{ faculty_count }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card stat-card bg-gradient-purple h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="card-title text-uppercase fw-bold opacity-75 mb-0">Department Students</h6>
+                        <i class="bi bi-people-fill stat-icon"></i>
+                    </div>
+                    <h2 class="display-5 fw-bold mb-0">{{ student_count }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card stat-card bg-gradient-red h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="card-title text-uppercase fw-bold opacity-75 mb-0">Pending Approvals</h6>
+                        <i class="bi bi-check-circle stat-icon"></i>
+                    </div>
+                    <h2 class="display-5 fw-bold mb-0">{{ pending_verifications }}</h2>
+                    <div class="mt-2 text-white-50 small">Marks awaiting verification</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mb-5">
+        <h4 class="fw-bold mb-4 text-dark"><i class="bi bi-lightning-charge-fill text-warning me-2"></i>Quick Actions</h4>
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <a href="{% url 'faculty:faculty_list' %}" class="btn btn-light w-100 quick-action-btn shadow-sm border">
+                    <i class="bi bi-briefcase text-primary fs-4"></i>
+                    <span class="text-dark">Manage Faculty</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{% url 'students:student_list' %}" class="btn btn-light w-100 quick-action-btn shadow-sm border">
+                    <i class="bi bi-mortarboard text-success fs-4"></i>
+                    <span class="text-dark">Manage Students</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{% url 'students:student_add' %}" class="btn btn-light w-100 quick-action-btn shadow-sm border">
+                    <i class="bi bi-person-plus text-success fs-4"></i>
+                    <span class="text-dark">Add Student</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{% url 'students:batch_list' %}" class="btn btn-light w-100 quick-action-btn shadow-sm border">
+                    <i class="bi bi-collection text-info fs-4"></i>
+                    <span class="text-dark">Manage Batches</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{% url 'courses:subject_list' %}" class="btn btn-light w-100 quick-action-btn shadow-sm border">
+                    <i class="bi bi-book text-secondary fs-4"></i>
+                    <span class="text-dark">Manage Subjects</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{% url 'timetable:timetable_view' %}" class="btn btn-light w-100 quick-action-btn shadow-sm border">
+                    <i class="bi bi-calendar-range text-warning fs-4"></i>
+                    <span class="text-dark">Timetable</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{% url 'examinations:marks_verify_list' %}" class="btn btn-light w-100 quick-action-btn shadow-sm border">
+                    <i class="bi bi-patch-check text-danger fs-4"></i>
+                    <span class="text-dark">Verify Marks</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{% url 'attendance:attendance_report' %}" class="btn btn-light w-100 quick-action-btn shadow-sm border">
+                    <i class="bi bi-bar-chart-line text-primary fs-4"></i>
+                    <span class="text-dark">Attendance</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Tables -->
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0 text-dark">Recent Faculty</h5>
+                <a href="{% url 'faculty:faculty_list' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">View All</a>
+            </div>
+            <div class="table-modern">
+                <div class="table-responsive">
+                    <table class="table table-borderless mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Designation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fac in recent_faculty %}
+                            <tr>
+                                <td class="fw-bold">{{ fac.user.get_full_name }}</td>
+                                <td>{{ fac.get_designation_display }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="2" class="text-center py-4 text-muted">No faculty assigned.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0 text-dark">Recent Students</h5>
+                <a href="{% url 'students:student_list' %}" class="btn btn-sm btn-outline-success rounded-pill px-3">View All</a>
+            </div>
+            <div class="table-modern">
+                <div class="table-responsive">
+                    <table class="table table-borderless mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Batch</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stu in recent_students %}
+                            <tr>
+                                <td class="fw-bold">{{ stu.user.get_full_name }}</td>
+                                <td>{{ stu.batch }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="2" class="text-center py-4 text-muted">No students found.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

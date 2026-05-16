@@ -1,0 +1,97 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Attendance Report | CPAS{% endblock %}
+{% block dashboard_content %}
+<div class="container-fluid py-4">
+  <h2 class="fw-bold mb-4"><i class="bi bi-bar-chart-line-fill text-success me-2"></i>Attendance Report</h2>
+  <div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+      <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label fw-medium">Batch</label>
+          <select name="batch" id="id_batch" class="form-select">
+            <option value="">-- All Batches --</option>
+            {% for b in batches %}<option value="{{ b.pk }}" {% if selected_batch == b.pk|stringformat:"s" %}selected{% endif %}>{{ b }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-medium">Subject</label>
+          <select name="subject" id="id_subject" class="form-select">
+            <option value="">-- All Subjects --</option>
+            {% for s in subjects %}<option value="{{ s.pk }}" {% if selected_subject == s.pk|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3"><button type="submit" class="btn btn-success w-100 rounded-pill">Generate Report</button></div>
+      </form>
+    </div>
+  </div>
+
+  {% if report_data %}
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light text-uppercase small text-muted">
+            <tr><th class="ps-4">Student</th><th>Total Classes</th><th>Present</th><th>Absent</th><th>Percentage</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            {% for row in report_data %}
+            <tr class="{% if row.low %}table-danger{% endif %}">
+              <td class="ps-4 fw-bold">{{ row.student.user.get_full_name }}<br><small class="text-muted fw-normal">{{ row.student.user.email }}</small></td>
+              <td>{{ row.total }}</td>
+              <td class="text-success fw-bold">{{ row.present }}</td>
+              <td class="text-danger fw-bold">{{ row.absent }}</td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="progress flex-grow-1" style="height:8px;">
+                    <div class="progress-bar {% if row.low %}bg-danger{% else %}bg-success{% endif %}" style="width:{{ row.percentage }}%"></div>
+                  </div>
+                  <span class="fw-bold {% if row.low %}text-danger{% else %}text-success{% endif %}">{{ row.percentage }}%</span>
+                </div>
+              </td>
+              <td>
+                {% if row.low %}<span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3"><i class="bi bi-exclamation-triangle me-1"></i>Shortage</span>
+                {% else %}<span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3"><i class="bi bi-check-circle me-1"></i>Good</span>{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const batchSelect = document.getElementById('id_batch');
+    const subjectSelect = document.getElementById('id_subject');
+
+    if (batchSelect && subjectSelect) {
+        batchSelect.addEventListener('change', function() {
+            const batchId = this.value;
+            if (!batchId) {
+                // If no batch, maybe reload page or show all? 
+                // For now, clear subjects unless we want to show all.
+                return;
+            }
+
+            fetch(`{% url 'courses:get_batch_subjects' %}?batch_id=${batchId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const currentVal = subjectSelect.value;
+                    subjectSelect.innerHTML = '<option value="">-- Select Subject --</option>';
+                    data.forEach(sub => {
+                        const option = document.createElement('option');
+                        option.value = sub.id;
+                        option.textContent = sub.name;
+                        if (sub.id.toString() === currentVal) option.selected = true;
+                        subjectSelect.appendChild(option);
+                    });
+                });
+        });
+    }
+});
+</script>
+{% endblock %}
+

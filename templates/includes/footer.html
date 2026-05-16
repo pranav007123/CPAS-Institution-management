@@ -1,0 +1,38 @@
+<footer class="footer mt-auto py-5 bg-dark text-white">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <h4 class="text-white fw-bold mb-3"><i class="bi bi-mortarboard-fill me-2 text-warning"></i> CPAS</h4>
+                <p class="text-white-50">CPAS smart campus and institutional ERP. Providing cutting-edge institutional solutions.</p>
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <h5 class="text-white mb-3">Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="{% url 'website:home' %}" class="text-white-50 text-decoration-none">Home</a></li>
+                    <li class="mb-2"><a href="{% url 'website:about' %}" class="text-white-50 text-decoration-none">About Us</a></li>
+                    <li class="mb-2"><a href="{% url 'website:courses' %}" class="text-white-50 text-decoration-none">Admissions</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <h5 class="text-white mb-3">Support</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Help Desk</a></li>
+                    <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Documentation</a></li>
+                    <li class="mb-2"><a href="{% url 'accounts:login' %}" class="text-white-50 text-decoration-none">Staff Login</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-3">
+                <h5 class="text-white mb-3">Contact</h5>
+                <ul class="list-unstyled text-white-50 small">
+                    <li class="mb-2"><i class="bi bi-geo-alt-fill me-2"></i> Gandhinagar, Kottayam, Kerala</li>
+                    <li class="mb-2"><i class="bi bi-telephone-fill me-2"></i> +91 481 2595478</li>
+                    <li class="mb-2"><i class="bi bi-envelope-fill me-2"></i> info@cpas.edu</li>
+                </ul>
+            </div>
+        </div>
+        <hr class="mt-5 mb-4 border-secondary">
+        <div class="text-center text-white-50 small">
+            &copy; {% now "Y" %} CPAS. All Rights Reserved.
+        </div>
+    </div>
+</footer>

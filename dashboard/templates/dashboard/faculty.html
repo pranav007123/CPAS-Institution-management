@@ -1,0 +1,209 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Faculty Dashboard | CPAS{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid py-2">
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between bg-white p-4 rounded-4 shadow-sm border-start border-4 border-primary">
+                <div>
+                    <h2 class="fw-bold text-dark mb-1">Hello, Prof. {{ request.user.last_name }}! 🎓</h2>
+                    <p class="text-muted mb-0">Managing your classes and students is easier than ever.</p>
+                </div>
+                <div class="text-end d-none d-md-block">
+                    <div class="text-primary fw-bold fs-4">{% now "H:i" %}</div>
+                    <div class="text-muted small">{% now "l, F jS" %}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's timetable & assigned subjects -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0">Today's timetable</h5>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    {% if today_periods %}
+                    <ul class="list-group list-group-flush">
+                        {% for p in today_periods %}
+                        <li class="list-group-item px-0 d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="fw-bold">{{ p.subject.subject_code }} — {{ p.subject.subject_name }}</div>
+                                <small class="text-muted">P{{ p.period_number }} · {{ p.batch }} · {{ p.classroom|default:"Room TBA" }}</small>
+                            </div>
+                            <span class="badge bg-primary rounded-pill">{{ p.start_time|time:"H:i" }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted small mb-0">No periods scheduled for you today.</p>
+                    {% endif %}
+                    <a href="{% url 'timetable:timetable_view' %}" class="btn btn-outline-primary btn-sm rounded-pill mt-3">Full timetable</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between">
+                    <h5 class="fw-bold mb-0">Assigned subjects</h5>
+                    <span class="badge bg-secondary">{{ subjects_count }}</span>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    {% if assigned_subjects %}
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for s in assigned_subjects %}
+                        <span class="badge bg-light text-dark border rounded-pill px-3 py-2">{{ s.subject_code }} · {{ s.subject_name|truncatechars:28 }}</span>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted small mb-0">No subjects assigned yet. Ask the administrator to map you on subject records.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-body p-4 bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase opacity-75 small">Total Subjects</h6>
+                            <h2 class="fw-bold mb-0">{{ subjects_count }}</h2>
+                        </div>
+                        <i class="bi bi-journal-bookmark fs-1 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-body p-4 bg-success text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase opacity-75 small">Total Students</h6>
+                            <h2 class="fw-bold mb-0">{{ student_count }}</h2>
+                        </div>
+                        <i class="bi bi-people fs-1 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-body p-4 bg-info text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase opacity-75 small">Pending Assignments</h6>
+                            <h2 class="fw-bold mb-0">{{ pending_assignments }}</h2>
+                        </div>
+                        <i class="bi bi-clipboard-check fs-1 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Main Actions & Recent Attendance -->
+        <div class="col-12 col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">Recent Attendance Logs</h5>
+                    <a href="{% url 'attendance:mark_attendance' %}" class="btn btn-primary btn-sm rounded-pill px-3">Mark New</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4 border-0">Date</th>
+                                    <th class="border-0">Subject</th>
+                                    <th class="border-0">Batch</th>
+                                    <th class="border-0 pe-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for att in recent_attendance %}
+                                <tr>
+                                    <td class="ps-4">{{ att.date }}</td>
+                                    <td>{{ att.subject.name }}</td>
+                                    <td>{{ att.batch }}</td>
+                                    <td class="pe-4"><span class="badge bg-success-subtle text-success rounded-pill px-3">Recorded</span></td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">No recent attendance records.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0">Active Assignments</h5>
+                </div>
+                <div class="card-body">
+                    {% for assignment in upcoming_deadlines %}
+                    <div class="d-flex align-items-center p-3 mb-3 bg-light rounded-3 border-start border-3 border-warning">
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1">{{ assignment.title }}</h6>
+                            <small class="text-muted">{{ assignment.subject.name }} | Due: {{ assignment.due_date|date:"M d, Y" }}</small>
+                        </div>
+                        <a href="{% url 'assignments:assignment_detail' assignment.pk %}" class="btn btn-outline-primary btn-sm rounded-pill">Manage</a>
+                    </div>
+                    {% empty %}
+                    <p class="text-center text-muted py-3">No active assignments.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Actions & Announcements -->
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-dark text-white">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4">Quick Links</h5>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'attendance:mark_attendance' %}" class="btn btn-primary text-start p-3 rounded-3 border-0">
+                            <i class="bi bi-calendar-check me-2"></i> Mark Attendance
+                        </a>
+                        <a href="{% url 'assignments:assignment_add' %}" class="btn btn-light text-start p-3 rounded-3 border-0">
+                            <i class="bi bi-plus-circle me-2"></i> Post Assignment
+                        </a>
+                        <a href="{% url 'examinations:exam_list' %}" class="btn btn-outline-light text-start p-3 rounded-3">
+                            <i class="bi bi-award me-2"></i> Grade Exams
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0 text-primary">Campus Notices</h5>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    {% for notice in campus_notices %}
+                    <div class="notice-item mb-3 pb-3 border-bottom">
+                        <h6 class="fw-bold mb-1">{{ notice.title }}</h6>
+                        <small class="text-muted d-block mb-2">{{ notice.created_at|timesince }} ago</small>
+                        <p class="small text-secondary mb-0">{{ notice.content|truncatewords:15 }}</p>
+                    </div>
+                    {% empty %}
+                    <p class="text-center text-muted py-3 small">No recent announcements.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

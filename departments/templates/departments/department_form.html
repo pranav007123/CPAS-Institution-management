@@ -1,0 +1,68 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}{{ title }} | CPAS{% endblock %}
+{% block dashboard_content %}
+<div class="container py-4" style="max-width:650px;">
+  <div class="d-flex align-items-center mb-4 gap-3">
+    <a href="{% url 'departments:department_list' %}" class="btn btn-light rounded-circle shadow-sm" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;"><i class="bi bi-arrow-left"></i></a>
+    <h2 class="fw-bold mb-0">{{ title }}</h2>
+  </div>
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label class="form-label fw-semibold">Department Name <span class="text-danger">*</span></label>
+            <input type="text" name="name" class="form-control rounded-3" required value="{{ dept.name|default:'' }}" placeholder="e.g., Computer Science">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Code <span class="text-danger">*</span></label>
+            <input type="text" name="code" class="form-control rounded-3" required value="{{ dept.code|default:'' }}" placeholder="CS" style="text-transform:uppercase;">
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Institution <span class="text-danger">*</span></label>
+            <select name="institution" class="form-select rounded-3" required>
+              <option value="">— Select Institution —</option>
+              {% for inst in institutions %}
+              <option value="{{ inst.pk }}"
+                {% if dept and dept.institution_id == inst.pk %}selected
+                {% elif preselected_institution and preselected_institution.pk == inst.pk %}selected
+                {% endif %}>
+                {{ inst.institution_name }} ({{ inst.institution_code }})
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">HOD
+              <small class="text-muted fw-normal">(Optional — <a href="{% url 'departments:add_hod' %}">Create new HOD</a>)</small>
+            </label>
+            <select name="hod" class="form-select rounded-3">
+              <option value="">— Assign Later —</option>
+              {% for hod in hods %}
+              <option value="{{ hod.pk }}" {% if dept and dept.hod_id == hod.pk %}selected{% endif %}>
+                {{ hod.get_full_name }} ({{ hod.email }})
+              </option>
+              {% endfor %}
+            </select>
+            {% if not hods %}
+            <div class="form-text text-warning">
+              <i class="bi bi-exclamation-triangle me-1"></i>No HOD accounts yet.
+              <a href="{% url 'departments:add_hod' %}">Create an HOD first.</a>
+            </div>
+            {% endif %}
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Description</label>
+            <textarea name="description" class="form-control rounded-3" rows="2" placeholder="Brief description...">{{ dept.description|default:'' }}</textarea>
+          </div>
+        </div>
+        <div class="d-flex gap-3 justify-content-end mt-4 pt-3 border-top">
+          <a href="{% url 'departments:department_list' %}" class="btn btn-light rounded-pill px-4">Cancel</a>
+          <button type="submit" class="btn btn-warning text-white rounded-pill px-5 shadow-sm">{{ title }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}{{ title }} | CPAS{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0 fw-bold">{{ title }}</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Course</label>
+                            <select name="course" class="form-select" required {% if semester %}disabled{% endif %}>
+                                {% for course in courses %}
+                                    <option value="{{ course.id }}" {% if semester and semester.course_id == course.id %}selected{% endif %}>
+                                        {{ course.course_name }} ({{ course.code }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if semester %}<input type="hidden" name="course" value="{{ semester.course_id }}">{% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Semester Number</label>
+                            <input type="number" name="semester_number" class="form-control" value="{{ semester.semester_number|default:1 }}" required min="1">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Academic Year</label>
+                            <input type="text" name="academic_year" class="form-control" value="{{ semester.academic_year|default:'2025-2026' }}" placeholder="e.g. 2025-2026" required>
+                        </div>
+
+                        {% if semester %}
+                        <div class="mb-3 form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_active" id="isActive" {% if semester.is_active %}checked{% endif %}>
+                            <label class="form-check-label fw-bold" for="isActive">Is Active</label>
+                        </div>
+                        {% endif %}
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary rounded-pill px-4">Save Semester</button>
+                            <a href="{% url 'courses:semester_list' %}" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

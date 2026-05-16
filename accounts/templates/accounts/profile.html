@@ -1,0 +1,48 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}My Profile | CPAS{% endblock %}
+{% block dashboard_content %}
+<div class="container-fluid py-2">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-primary py-5 text-center text-white position-relative">
+          {% if user.profile_picture %}
+            <img src="{{ user.profile_picture.url }}" class="rounded-circle border border-4 border-white shadow-sm" width="120" height="120" style="object-fit:cover; position:absolute; bottom:-60px; left:50%; transform:translateX(-50%);">
+          {% else %}
+            <div class="rounded-circle bg-white text-primary border border-4 border-white shadow-sm d-flex align-items-center justify-content-center fw-bold fs-1" style="width:120px; height:120px; position:absolute; bottom:-60px; left:50%; transform:translateX(-50%);">
+              {{ user.first_name|first|default:user.email|first }}
+            </div>
+          {% endif %}
+        </div>
+        <div class="card-body pt-5 mt-4 text-center">
+          <h3 class="fw-bold mb-1">{{ user.get_full_name|default:user.email }}</h3>
+          <span class="badge bg-primary rounded-pill px-3 py-2 mb-3">{{ user.get_role_display }}</span>
+          
+          <div class="row g-4 mt-2 text-start px-md-5">
+            <div class="col-md-6">
+              <label class="text-muted small fw-bold text-uppercase">Email Address</label>
+              <p class="mb-0 fw-medium">{{ user.email }}</p>
+            </div>
+            <div class="col-md-6">
+              <label class="text-muted small fw-bold text-uppercase">Phone Number</label>
+              <p class="mb-0 fw-medium">{{ user.phone_number|default:"Not provided" }}</p>
+            </div>
+            <div class="col-md-6">
+              <label class="text-muted small fw-bold text-uppercase">Member Since</label>
+              <p class="mb-0 fw-medium">{{ user.date_joined|date:"F d, Y" }}</p>
+            </div>
+            <div class="col-md-6">
+              <label class="text-muted small fw-bold text-uppercase">Account Status</label>
+              <p class="mb-0"><span class="text-success fw-bold">Active</span></p>
+            </div>
+          </div>
+          
+          <div class="mt-5 border-top pt-4">
+            <a href="{% url 'accounts:settings' %}" class="btn btn-primary rounded-pill px-4"><i class="bi bi-pencil-square me-2"></i>Edit Profile</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

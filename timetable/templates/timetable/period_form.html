@@ -1,0 +1,90 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Add Period | CPAS{% endblock %}
+{% block dashboard_content %}
+<div class="container py-4" style="max-width:760px;">
+  <div class="d-flex align-items-center mb-4 gap-3">
+    <a href="{% url 'timetable:timetable_view' %}" class="btn btn-light rounded-circle shadow-sm" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;"><i class="bi bi-arrow-left"></i></a>
+    <h2 class="fw-bold mb-0">Add Timetable Period</h2>
+  </div>
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label fw-medium">Batch</label>{{ form.batch }}</div>
+          <div class="col-md-6"><label class="form-label fw-medium">Semester</label>{{ form.semester }}</div>
+          <div class="col-md-4"><label class="form-label fw-medium">Day</label>{{ form.day_of_week }}</div>
+          <div class="col-md-4"><label class="form-label fw-medium">Period #</label>{{ form.period_number }}</div>
+          <div class="col-md-4"></div>
+          <div class="col-md-6"><label class="form-label fw-medium">Start time</label>{{ form.start_time }}</div>
+          <div class="col-md-6"><label class="form-label fw-medium">End time</label>{{ form.end_time }}</div>
+          <div class="col-md-6"><label class="form-label fw-medium">Subject</label>{{ form.subject }}</div>
+          <div class="col-md-6"><label class="form-label fw-medium">Faculty</label>{{ form.faculty }}</div>
+          <div class="col-12"><label class="form-label fw-medium">Classroom</label>{{ form.classroom }}</div>
+        </div>
+        <div class="d-flex gap-3 justify-content-end mt-4 pt-3 border-top">
+          <a href="{% url 'timetable:timetable_view' %}" class="btn btn-light rounded-pill px-4">Cancel</a>
+          <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm">Save period</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const batchSelect = document.getElementById('id_batch');
+    const semesterSelect = document.getElementById('id_semester');
+    const subjectSelect = document.getElementById('id_subject');
+
+    // 1. Batch -> Semester
+    if (batchSelect && semesterSelect) {
+        batchSelect.addEventListener('change', function() {
+            const batchId = this.value;
+            if (!batchId) {
+                semesterSelect.innerHTML = '<option value="">---------</option>';
+                subjectSelect.innerHTML = '<option value="">---------</option>';
+                return;
+            }
+
+            fetch(`{% url 'courses:get_batch_semesters' %}?batch_id=${batchId}`)
+                .then(response => response.json())
+                .then(data => {
+                    semesterSelect.innerHTML = '<option value="">Select Semester</option>';
+                    data.forEach(sem => {
+                        const option = document.createElement('option');
+                        option.value = sem.id;
+                        option.textContent = `Semester ${sem.number}`;
+                        semesterSelect.appendChild(option);
+                    });
+                    // Trigger semester change to clear subjects
+                    semesterSelect.dispatchEvent(new Event('change'));
+                });
+        });
+    }
+
+    // 2. Semester -> Subject
+    if (semesterSelect && subjectSelect) {
+        semesterSelect.addEventListener('change', function() {
+            const semesterId = this.value;
+            if (!semesterId) {
+                subjectSelect.innerHTML = '<option value="">---------</option>';
+                return;
+            }
+
+            fetch(`{% url 'courses:get_subjects' %}?semester_id=${semesterId}`)
+                .then(response => response.json())
+                .then(data => {
+                    subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+                    data.forEach(sub => {
+                        const option = document.createElement('option');
+                        option.value = sub.id;
+                        option.textContent = sub.name;
+                        subjectSelect.appendChild(option);
+                    });
+                });
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Manage Students | CPAS{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        {% if user.is_hod %}
+            <h2 class="fw-bold text-dark"><i class="bi bi-people-fill text-primary me-2"></i>Department Students</h2>
+        {% else %}
+            <h2 class="fw-bold text-dark"><i class="bi bi-people-fill text-primary me-2"></i>Students Directory</h2>
+        {% endif %}
+        
+        {% if user.is_hod %}
+        <a href="{% url 'students:student_add' %}" class="btn btn-primary shadow-sm rounded-pill px-4">
+            <i class="bi bi-person-plus-fill me-2"></i> Add New Student
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-white border-bottom p-3">
+            <form method="get" class="d-flex w-100 w-md-50">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="search" class="form-control bg-light border-start-0" placeholder="Search name or Reg No..." value="{{ request.GET.search }}">
+                    <button class="btn btn-outline-secondary" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-uppercase small text-muted">
+                        <tr>
+                            <th class="ps-4">Student</th>
+                            <th>Reg Number</th>
+                            <th>Course / Batch</th>
+                            <th>Institution</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    {% if student.user.profile_picture %}
+                                    <img src="{{ student.user.profile_picture.url }}" class="rounded-circle object-fit-cover" width="40" height="40" alt="Avatar">
+                                    {% else %}
+                                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
+                                        {{ student.user.first_name|first|default:"S"|upper }}
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ student.user.get_full_name }}</div>
+                                        <div class="text-muted small">{{ student.user.email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge bg-light text-dark border">{{ student.register_number }}</span></td>
+                            <td>
+                                <div class="fw-medium">{{ student.batch.course.course_code }}</div>
+                                <div class="text-muted small">{{ student.batch.batch_name }}</div>
+                            </td>
+                            <td>{{ student.institution.institution_code }}</td>
+                            <td>
+                                {% if student.user.is_active %}
+                                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2"><i class="bi bi-check-circle-fill me-1"></i> Active</span>
+                                {% else %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3 py-2"><i class="bi bi-x-circle-fill me-1"></i> Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                {% if user.is_hod %}
+                                <a href="{% url 'students:student_edit' student.pk %}" class="btn btn-sm btn-light border text-primary" title="Edit">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <form method="post" action="{% url 'students:student_deactivate' student.pk %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-light border text-warning ms-1" title="Toggle Status">
+                                        <i class="bi bi-power"></i>
+                                    </button>
+                                </form>
+                                <form method="post" action="{% url 'students:student_delete' student.pk %}" class="d-inline" onsubmit="return confirm('Are you sure? This will permanently delete the student account!')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-light border text-danger ms-1" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                No students found matching your criteria.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% if is_paginated %}
+        <div class="card-footer bg-white border-top p-3 d-flex justify-content-center">
+            <nav>
+                <ul class="pagination mb-0">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ request.GET.search }}">Previous</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ request.GET.search }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

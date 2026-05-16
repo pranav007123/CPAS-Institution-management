@@ -1,0 +1,35 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Notifications | CPAS{% endblock %}
+{% block dashboard_content %}
+<div class="container py-4" style="max-width:800px;">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold"><i class="bi bi-bell-fill text-primary me-2"></i>Notifications
+      {% if unread_count %}<span class="badge bg-danger ms-2 rounded-pill">{{ unread_count }}</span>{% endif %}
+    </h2>
+    {% if user.is_faculty or user.is_super_admin or user.is_institution_admin %}
+    <a href="{% url 'notifications:send_notification' %}" class="btn btn-primary rounded-pill px-4 shadow-sm"><i class="bi bi-send me-2"></i>Send</a>
+    {% endif %}
+  </div>
+  {% for n in notifications %}
+  <div class="card border-0 shadow-sm rounded-4 mb-3 {% if not n.is_read %}border-start border-primary border-3{% endif %}">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-start">
+        <div class="flex-grow-1">
+          <div class="d-flex align-items-center gap-2 mb-1">
+            {% if not n.is_read %}<span class="badge bg-primary rounded-pill px-2 py-1" style="font-size:0.65rem;">NEW</span>{% endif %}
+            <h6 class="fw-bold mb-0">{{ n.title }}</h6>
+          </div>
+          <p class="text-muted mb-2">{{ n.message }}</p>
+          <small class="text-muted"><i class="bi bi-clock me-1"></i>{{ n.created_at|timesince }} ago</small>
+        </div>
+        {% if not n.is_read %}
+        <a href="{% url 'notifications:mark_read' n.pk %}" class="btn btn-sm btn-light border ms-3"><i class="bi bi-check2 text-primary"></i></a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="text-center py-5 text-muted"><i class="bi bi-bell fs-1 d-block mb-3"></i>You have no notifications.</div>
+  {% endfor %}
+</div>
+{% endblock %}
