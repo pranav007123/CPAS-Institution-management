@@ -5,7 +5,7 @@
 {% block public_content %}
 <!-- Hero Section -->
 <section class="hero-section position-relative overflow-hidden text-white d-flex align-items-center"
-    style="min-height: 85vh; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/C:/Users/krish/.gemini/antigravity/brain/457a6486-9807-469d-be99-a00ace983eb5/stas_hero_bg_1778931209816.png') center/cover no-repeat;">
+    style="min-height: 85vh; background: linear-gradient(135deg, rgba(13, 37, 63, 0.95), rgba(26, 82, 118, 0.9));">
     <div class="container position-relative z-1 py-5">
         <div class="row align-items-center">
             <div class="col-lg-8 animate__animated animate__fadeInLeft">
@@ -13,8 +13,8 @@
                     2026-27</span>
                 <h1 class="display-3 fw-bold mb-4" style="letter-spacing: -2px;">Excellence in <span
                         class="text-warning">Technology</span> & Science</h1>
-                <p class="lead fs-4 mb-5 opacity-90" style="max-width: 650px;">School of Technology and Applied Sciences
-                    (STAS), Kottayam — A premier institution dedicated to grooming future leaders in Computer Science,
+                <p class="lead fs-4 mb-5 opacity-90" style="max-width: 650px;">{{ institution.name|default:"School of Technology and Applied Sciences" }}
+                    — A premier institution dedicated to grooming future leaders in Computer Science,
                     Cyber Security, and Electronics.</p>
                 <div class="d-flex gap-3 flex-wrap">
                     <a href="{% url 'website:courses' %}"
@@ -34,7 +34,7 @@
             <div class="col-lg-6">
                 <h6 class="text-primary fw-bold text-uppercase mb-3">About STAS</h6>
                 <h2 class="fw-bold mb-4 fs-1">Nurturing Innovation Since Inception</h2>
-                <p class="text-muted lead mb-4">STAS Kottayam is a constituent unit of the Centre for Professional and
+                <p class="text-muted lead mb-4">{{ institution.name|default:"STAS Kottayam" }} is a constituent unit of the Centre for Professional and
                     Advanced Studies (CPAS), established by the Government of Kerala. We focus on delivering
                     high-quality education in technical and applied science fields, ensuring our students are
                     industry-ready from day one.</p>
@@ -90,42 +90,27 @@
             <h2 class="fw-bold fs-1">Our Featured Courses</h2>
         </div>
         <div class="row g-4">
+            {% for course in featured_courses %}
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden card-hover">
-                    <div class="p-5 text-center bg-white">
-                        <i class="bi bi-laptop fs-1 text-primary mb-3"></i>
-                        <h4 class="fw-bold mb-3">MCA</h4>
-                        <p class="text-muted small">Master of Computer Applications (Regular & Lateral Entry) with focus
-                            on AI, Cloud, and App Development.</p>
-                        <a href="{% url 'website:courses' %}"
-                            class="btn btn-outline-primary btn-sm rounded-pill px-4 mt-3">Learn More</a>
+                    <div class="p-5 text-center bg-white d-flex flex-column h-100 justify-content-between">
+                        <div>
+                            <i class="bi {{ course.icon_class }} fs-1 text-primary mb-3"></i>
+                            <h4 class="fw-bold mb-3">{{ course.course_name }}</h4>
+                            <p class="text-muted small">{{ course.description }}</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'website:course_detail' course.pk %}"
+                                class="btn btn-outline-primary btn-sm rounded-pill px-4 mt-3">Learn More</a>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden card-hover">
-                    <div class="p-5 text-center bg-white">
-                        <i class="bi bi-shield-lock fs-1 text-primary mb-3"></i>
-                        <h4 class="fw-bold mb-3">M.Sc Cyber Security</h4>
-                        <p class="text-muted small">Specialized post-graduate program in Information Security, Ethical
-                            Hacking, and Digital Forensics.</p>
-                        <a href="{% url 'website:courses' %}"
-                            class="btn btn-outline-primary btn-sm rounded-pill px-4 mt-3">Learn More</a>
-                    </div>
-                </div>
+            {% empty %}
+            <div class="col-12 text-center py-4">
+                <p class="text-muted">No featured courses currently available.</p>
             </div>
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden card-hover">
-                    <div class="p-5 text-center bg-white">
-                        <i class="bi bi-cpu fs-1 text-primary mb-3"></i>
-                        <h4 class="fw-bold mb-3">B.Sc Electronics</h4>
-                        <p class="text-muted small">Comprehensive undergraduate course covering VLSI, Embedded Systems,
-                            and Robotics.</p>
-                        <a href="{% url 'website:courses' %}"
-                            class="btn btn-outline-primary btn-sm rounded-pill px-4 mt-3">Learn More</a>
-                    </div>
-                </div>
-            </div>
+            {% endfor %}
         </div>
     </div>
 </section>
@@ -134,22 +119,25 @@
 <section class="py-5 bg-white">
     <div class="container py-4">
         <div class="row g-5 align-items-center">
-            <div class="col-lg-5">
-                <div class="rounded-4 overflow-hidden shadow-lg border-5 border-white border">
-                    <img src="/C:/Users/krish/.gemini/antigravity/brain/457a6486-9807-469d-be99-a00ace983eb5/principal_portrait_1778931277074.png"
-                        alt="Principal STAS" class="img-fluid">
+            <div class="col-lg-5 text-center">
+                <div class="d-inline-block p-3 bg-white rounded-4 shadow-lg border" style="max-width: 320px;">
+                    {% if institution.principal and institution.principal.profile_picture %}
+                    <img src="{{ institution.principal.profile_picture.url }}" alt="Principal {{ institution.principal.get_full_name }}" class="img-fluid rounded-3 shadow-sm" style="aspect-ratio: 3/4; object-fit: cover; object-position: top center; width: 100%;">
+                    {% else %}
+                    <img src="/media/profiles/Sreejith%20l%20das.jpg" alt="Principal Dr. Sreejith L Das" class="img-fluid rounded-3 shadow-sm" style="aspect-ratio: 3/4; object-fit: cover; object-position: top center; width: 100%;">
+                    {% endif %}
                 </div>
             </div>
             <div class="col-lg-7">
                 <div class="ps-lg-4">
                     <i class="bi bi-quote fs-1 text-primary opacity-25"></i>
                     <h2 class="fw-bold mb-4">Message from the Principal</h2>
-                    <p class="lead text-muted mb-4 italic">"At STAS Kottayam, we believe in technical education that
+                    <p class="lead text-muted mb-4 italic">"At {{ institution.name|default:'STAS Kottayam' }}, we believe in technical education that
                         transcends textbooks. Our mission is to provide an environment where curiosity is encouraged,
                         and innovation is a daily practice. We are proud of our legacy and look forward to shaping the
                         tech leaders of tomorrow."</p>
-                    <h5 class="fw-bold mb-1">Dr. Sreekumar P.</h5>
-                    <p class="text-primary mb-0 small text-uppercase fw-bold">Principal, STAS Kottayam</p>
+                    <h5 class="fw-bold mb-1">{{ institution.principal.get_full_name|default:institution.principal.email|default:"Principal" }}</h5>
+                    <p class="text-primary mb-0 small text-uppercase fw-bold">Principal, {{ institution.name|default:"STAS Kottayam" }}</p>
                 </div>
             </div>
         </div>
@@ -170,14 +158,21 @@
         <div class="row g-4">
             {% for notice in latest_notices %}
             <div class="col-md-4">
-                <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden bg-white">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">{{
-                                notice.created_at|date:"d M, Y" }}</span>
+                <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden bg-white card-hover border-start border-primary border-4">
+                    <div class="card-body p-4 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 fw-bold">{{ notice.created_at|date:"M d, Y" }}</span>
+                                {% if notice.priority == 'URGENT' or notice.priority == 'HIGH' %}
+                                <span class="badge bg-danger ms-2 rounded-pill small">{{ notice.get_priority_display }}</span>
+                                {% endif %}
+                            </div>
+                            <h5 class="fw-bold mb-3 text-dark">{{ notice.title }}</h5>
+                            <p class="text-muted small mb-4">{{ notice.message|truncatechars:120 }}</p>
                         </div>
-                        <h5 class="fw-bold mb-3">{{ notice.title }}</h5>
-                        <p class="text-muted small mb-0">{{ notice.message|truncatechars:120 }}</p>
+                        <div>
+                            <a href="{% url 'website:notices' %}" class="btn btn-link px-0 text-primary fw-bold text-decoration-none small">Read Full Notice <i class="bi bi-arrow-right ms-1"></i></a>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -13,11 +13,16 @@ class Course(models.Model):
     duration_years = models.PositiveIntegerField(default=3)
     total_semesters = models.PositiveIntegerField(default=6)
     intake_capacity = models.PositiveIntegerField(default=60)
+    description = models.TextField(blank=True, null=True, help_text="Detailed overview of the course.")
+    eligibility = models.TextField(blank=True, null=True, help_text="Eligibility criteria for admission.")
+    is_featured = models.BooleanField(default=False, help_text="Display this course on the public homepage featured section.")
+    icon_class = models.CharField(max_length=50, default='bi-mortarboard', help_text="Bootstrap icon class (e.g. bi-laptop, bi-shield-lock, bi-cpu).")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = (('department', 'course_code'), ('institution', 'course_code'))
+        ordering = ['created_at']
 
     def __str__(self):
         return f"{self.course_name} ({self.course_code})"
@@ -29,6 +34,10 @@ class Course(models.Model):
     @property
     def code(self):
         return self.course_code
+
+    @property
+    def duration(self):
+        return self.duration_years
 
 
 class Semester(models.Model):

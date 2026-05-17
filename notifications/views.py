@@ -11,10 +11,10 @@ def is_admin_or_faculty(user):
 @login_required
 def notification_list(request):
     user = request.user
-    # Get personal notifications + role-based broadcasts
+    # Get personal notifications + role-based broadcasts + general broadcasts
     notifications = Notification.objects.filter(
-        Q(recipient=user) | Q(recipient__isnull=True, role_target=user.role)
-    ).order_by('-created_at')
+        Q(recipient=user) | Q(recipient__isnull=True, role_target=user.role) | Q(recipient__isnull=True, role_target__isnull=True) | Q(recipient__isnull=True, role_target='')
+    ).distinct().order_by('-created_at')
 
     unread_count = notifications.filter(is_read=False).count()
     return render(request, 'notifications/notification_list.html', {
@@ -33,14 +33,12 @@ def send_notification(request):
         recipient_id = request.POST.get('recipient_id')
 
         if target_type == 'all':
-            for u in User.objects.all():
-                Notification.objects.create(title=title, message=message, recipient=u)
+            Notification.objects.create(title=title, message=message, recipient=None, role_target=None, is_public=True)
         elif target_type == 'role':
-            for u in User.objects.filter(role=role_target):
-                Notification.objects.create(title=title, message=message, recipient=u)
+            Notification.objects.create(title=title, message=message, recipient=None, role_target=role_target, is_public=False)
         elif target_type == 'user' and recipient_id:
             recipient = get_object_or_404(User, pk=recipient_id)
-            Notification.objects.create(title=title, message=message, recipient=recipient)
+            Notification.objects.create(title=title, message=message, recipient=recipient, is_public=False)
 
         messages.success(request, 'Notification sent successfully.')
         return redirect('notifications:notification_list')
@@ -53,7 +51,8 @@ def send_notification(request):
 
 @login_required
 def mark_read(request, pk):
-    notification = get_object_or_404(Notification, pk=pk, recipient=request.user)
-    notification.is_read = True
-    notification.save()
+    notification = get_object_or_404(Notification, pk=pk)
+    if notification.recipient == request.user:
+        notification.is_read = True
+        notification.save()
     return redirect('notifications:notification_list')

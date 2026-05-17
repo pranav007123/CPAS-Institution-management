@@ -15,8 +15,17 @@ def home(request):
         else:
             return redirect('accounts:login')
 
-    announcements = Notification.objects.filter(is_public=True).order_by('-created_at')[:5]
-    return render(request, 'website/home.html', {'announcements': announcements})
+    from courses.models import Course
+    from institutions.models import Institution
+    from notifications.models import Notification
+    featured_courses = Course.objects.filter(is_featured=True, is_active=True).select_related('department')[:3]
+    latest_notices = Notification.objects.filter(is_public=True, recipient__isnull=True).order_by('-created_at')[:3]
+    institution = Institution.objects.first()
+    return render(request, 'website/home.html', {
+        'latest_notices': latest_notices,
+        'featured_courses': featured_courses,
+        'institution': institution,
+    })
 
 
 def about(request):
@@ -36,7 +45,7 @@ def course_detail(request, pk):
 
 
 def notices(request):
-    public_notices = Notification.objects.filter(is_public=True).order_by('-created_at')
+    public_notices = Notification.objects.filter(is_public=True, recipient__isnull=True).order_by('-created_at')
     return render(request, 'website/notices.html', {'notices': public_notices})
 
 
